@@ -6,7 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "ci": "env _EXPERIMENTAL_DAGGER_INTERACTIVE_TUI=1 dagger run node --loader ts-node/esm ./build.mts",
+    "ci": "node --loader ts-node/esm ./build.mts",
+    "ci:interactive": "env _EXPERIMENTAL_DAGGER_INTERACTIVE_TUI=1 dagger run node --loader ts-node/esm ./build.mts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
