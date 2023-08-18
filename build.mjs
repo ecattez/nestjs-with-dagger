@@ -1,12 +1,12 @@
-import Client, { connect } from "@dagger.io/dagger";
+import { connect } from "@dagger.io/dagger";
 
-connect(async (client: Client) => {
+connect(async (client) => {
     const source = client
       .host()
       .directory(".", { exclude: ["node_modules/"] });
 
     const node = client.container()
-      .from("node:16");
+      .from("node:20");
 
     const runner = node
       .withDirectory("/src", source)
@@ -16,17 +16,18 @@ connect(async (client: Client) => {
     await runner
       .pipeline("Run unit tests")
       .withExec(["npm", "test"])
-      .exitCode();
+      .sync();
 
     await runner
       .pipeline("Run E2E tests")
       .withExec(["npm", "run", "test:e2e"])
-      .exitCode();
+      .sync();
 
     await runner
       .pipeline("Package application")
       .withExec(["npm", "run", "build"])
-      .exitCode();
+      .sync();
+
   },
   {
     LogOutput: process.stdout
