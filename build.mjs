@@ -6,7 +6,7 @@ connect(async (client) => {
       .directory(".", { exclude: ["node_modules/"] });
 
     const node = client.container()
-      .from("node:20");
+      .from("node:20-alpine");
 
     const runner = node
       .withDirectory("/src", source)
@@ -21,11 +21,6 @@ connect(async (client) => {
     await runner
       .pipeline("Run E2E tests")
       .withExec(["npm", "run", "test:e2e"])
-      .sync();
-
-    await runner
-      .pipeline("Package application")
-      .withExec(["npm", "run", "build"])
       .sync();
 
   },
