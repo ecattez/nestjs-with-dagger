@@ -7,9 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "ci": "ts-node --esm build.mjs",
-    "ci:interactive": "dagger run npm run ci",
+    "ci:interactive": "_EXPERIMENTAL_DAGGER_INTERACTIVE_TUI=1 dagger run npm run ci",
     "publish": "ts-node --esm publish.mjs",
-    "publish:interactive": "dagger run npm run publish",
+    "publish:interactive": "_EXPERIMENTAL_DAGGER_INTERACTIVE_TUI=1 dagger run npm run publish",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

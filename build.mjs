@@ -1,28 +1,22 @@
 import { connect } from "@dagger.io/dagger";
+import { npmInstall } from "./install.mjs";
+import { NPM } from "./constants.mjs";
 
 connect(async (client) => {
-    const source = client
-      .host()
-      .directory(".", { exclude: ["node_modules/"] });
+    const { source, dependencies } = await npmInstall(client);
 
-    const node = client.container()
-      .from("node:20-alpine");
-
-    const runner = node
-      .withDirectory("/src", source)
-      .withWorkdir("/src")
-      .withExec(["npm", "install"]);
+    const runner = dependencies
+      .withDirectory(".", source);
 
     await runner
       .pipeline("Run unit tests")
-      .withExec(["npm", "test"])
+      .withExec([NPM, "test"])
       .sync();
 
     await runner
       .pipeline("Run E2E tests")
-      .withExec(["npm", "run", "test:e2e"])
+      .withExec([NPM, "run", "test:e2e"])
       .sync();
-
   },
   {
     LogOutput: process.stdout

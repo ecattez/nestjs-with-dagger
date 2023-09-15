@@ -1,34 +1,26 @@
 import { connect } from "@dagger.io/dagger";
+import { npmInstall } from "./install.mjs";
+import { NODE_MODULES, NPM } from "./constants.mjs";
 
-const DIST_FOLDER = "./dist";
-const APP_FOLDER = "app";
-const NODE_MODULES = "node_modules";
+const WORKDIR = "/opt/app";
+const DIST_FOLDER = "dist";
 
 connect(async (client) => {
-    const source = client
-      .host()
-      .directory(".", { exclude: [`${NODE_MODULES}/`] });
+    const { source, dependencies } = await npmInstall(client);
 
-    const node = client.container()
-      .from("node:20-alpine");
-
-    const runner = node
-      .withDirectory("/src", source)
-      .withWorkdir("/src")
-      .withExec(["npm", "install"]);
-
-    const buildStage = await runner
+    const buildStage = dependencies
+      .withDirectory(".", source)
       .pipeline("Package application")
-      .withExec(["npm", "run", "build"]);
+      .withExec([NPM, "run", "build"]);
 
     const imageRef = await client.container()
       .pipeline("Publish application")
       .from("node:20-alpine")
-      .withWorkdir("/opt/app")
+      .withWorkdir(WORKDIR)
       .withDirectory(NODE_MODULES, buildStage.directory(NODE_MODULES))
-      .withDirectory(APP_FOLDER, buildStage.directory(DIST_FOLDER))
+      .withDirectory(DIST_FOLDER, buildStage.directory(DIST_FOLDER))
       .withExposedPort(3000)
-      .withEntrypoint(["node" , "app/main"])
+      .withEntrypoint(["node" , `${DIST_FOLDER}/main`])
       .publish("ttl.sh/nestjs-with-dagger-" + Math.floor(Math.random() * 10000000));
 
     console.log(`Published image to: ${imageRef}`);
